@@ -6,14 +6,39 @@ import cv2
 
 model = YOLO("yolov8n.pt")
 
-app = FastAPI()
+app = FastAPI(
+    title="Custom YOLOV8 Machine Learning API",
+    description="""Obtain object value out of image
+                    and return image""",
+    version="0.0.1",
+)
+
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+    "*"
+]
+
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 
-@app.post("/objectdetection/")
-async def get_body(file: bytes = File(...)):
+@app.post("/objectdetection")
+async def detect_cars_return_img(file: bytes = File(...)):
     input_image = Image.open(io.BytesIO(file)).convert("RGB")
-    results = model.predict(source=input_image, classes=[2, 5, 7])
+    results = model.track(source=input_image, persist=True, classes=[2, 5, 7], tracker='bytetrack.yaml')
     res_plotted = results[0].plot()
+
+    success, encoded_image = cv2.imencode('.jpg', res_plotted)
+    content = encoded_image.tobytes()
+    print(content == file)
+    return Response(content=content, media_type="image/jpg")
+
 
     # for r in results:
     #     boxes = r.boxes.xyxy  # Boxes object for bbox outputs
@@ -23,8 +48,3 @@ async def get_body(file: bytes = File(...)):
     # for obj in results_json:
 
     # Encoding already annotated image(BoundingBoxes, colors, classes, confidences)
-    success, encoded_image = cv2.imencode('.jpg', res_plotted)
-    content = encoded_image.tobytes()
-    print(content == file)
-    return Response(content=content, media_type="image/jpg")
-
