@@ -3,6 +3,7 @@ from PIL import Image
 from fastapi import File, FastAPI, Response
 from ultralytics import YOLO
 import cv2
+import pandas as pd
 
 model = YOLO("yolov8n.pt")
 
@@ -33,11 +34,15 @@ async def detect_cars_return_img(file: bytes = File(...)):
     input_image = Image.open(io.BytesIO(file)).convert("RGB")
     results = model.track(source=input_image, persist=True, classes=[2, 5, 7], tracker='bytetrack.yaml')
     res_plotted = results[0].plot()
-
     success, encoded_image = cv2.imencode('.jpg', res_plotted)
     content = encoded_image.tobytes()
-    print(content == file)
-    return Response(content=content, media_type="image/jpg")
+
+    # bird_view_raw = bird_view(results[0].id, results[0].cls, results[0].boxes.xyxy)
+    # success, bird_view_encoded = cv2.imencode('.jpg', bird_view_raw)
+    # bird_view_bytes = bird_view_encoded.tobytes()
+    
+    # print(content == file)
+    return Response(content=content, media_type="image/jpg")#, Response(content=bird_view_bytes, media_type="image/jpg")
 
 
     # for r in results:

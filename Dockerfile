@@ -13,8 +13,18 @@ RUN apt-get update && apt-get install -y libgl1-mesa-glx
 # Install system package required by libgthread-2.0.so.0
 RUN apt-get update && apt-get install -y libglib2.0-0
 
-# Install numpy
+RUN apt-get install gcc -y
+
+RUN apt-get -y install git
+
+RUN pip install Cython
+
 RUN pip install numpy
+RUN pip install lap==0.4.0
+# Install lap
+#RUN pip install numpy
+#RUN git clone https://github.com/gatagat/lap.git
+#RUN pip install -e lap/
 
 # Set an environment variable to ensure that OpenGL runs in headless mode
 ENV MESA_GLSL_CACHE_DISABLE=true
