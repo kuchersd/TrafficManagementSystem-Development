@@ -32,8 +32,6 @@ origins = [
 # ) 
 
 
-
-
 @app.post("/objectdetection")
 async def detect_cars_return_img(file: bytes = File(...)):
     input_image = Image.open(io.BytesIO(file))#.convert("RGB")
@@ -74,8 +72,10 @@ async def detect_cars_return_img(file: bytes = File(...)):
     
     print(transformer_cam.counter)
 
+    #responce = str(content) + str('') + str(bird_view_bytes)+ str('}')  + str(transformer_cam.counter)
+    responce = bird_view_bytes
     # print(content == file)
-    return Response(content=[content,bird_view_bytes], media_type="image/jpg")#, 
+    return Response(content=responce, media_type="image/jpg")#, 
     #return Response(content=bird_view_bytes, media_type="image/jpg")
 
 
