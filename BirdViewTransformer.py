@@ -539,6 +539,9 @@ class BirdViewTransformer:
         # Create a blank image to draw the rectangle on
         image_normalized = np.zeros_like(image_warped)
 
+        if len(bounding_boxes) == 0:
+            return image_normalized
+
         # Build a mask of elements located in required image region
         mask = [self.filter_point(box[2:]) for box in bounding_boxes]
 
