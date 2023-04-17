@@ -540,6 +540,9 @@ class BirdViewTransformer:
         image_normalized = np.zeros_like(image_warped)
 
         if len(bounding_boxes) == 0:
+            if self.bb_centres_transformed_prev is not None:
+                self.bb_centres_transformed_curr = self.bb_centres_transformed_prev
+                return image_normalized
             return image_normalized
 
         # Build a mask of elements located in required image region
