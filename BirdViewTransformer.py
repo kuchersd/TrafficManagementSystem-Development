@@ -539,15 +539,20 @@ class BirdViewTransformer:
         # Create a blank image to draw the rectangle on
         image_normalized = np.zeros_like(image_warped)
 
+        # If there are no cars on a frame and it's an initial frame
         if len(bounding_boxes) == 0:
-            if self.bb_centres_transformed_prev is not None:
-                self.bb_centres_transformed_curr = self.bb_centres_transformed_prev
-                return image_normalized
             return image_normalized
-
+        
+        # If there are no cars on a frame and it's not initial frame
+        if (len(bounding_boxes) == 0) and self.bb_centres_transformed_prev is not None:
+            self.bb_centres_transformed_curr = self.bb_centres_transformed_prev
+            self.object_ids_curr = self.object_ids_prev
+            return image_normalized
+        
         # Build a mask of elements located in required image region
         mask = [self.filter_point(box[2:]) for box in bounding_boxes]
 
+        # If cars are present on a frame but they are not located in specified region
         if sum(mask) == 0:
             return image_normalized
         
