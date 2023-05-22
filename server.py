@@ -23,14 +23,6 @@ origins = [
     "*"
 ]
 
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=origins,
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# ) 
-
 
 @app.post("/objectdetection")
 async def detect_cars_return_img(file: bytes = File(...)):
@@ -40,7 +32,7 @@ async def detect_cars_return_img(file: bytes = File(...)):
     success, encoded_image = cv2.imencode('.jpg', res_plotted)
     content = encoded_image.tobytes()
 
-    bounding_boxex = np.array(results[0].boxes.xyxy)
+    bounding_boxes = np.array(results[0].boxes.xyxy)
     labels = np.array(['car' if label == 2 else 'bus' if label == 5 else 'truck' for label in results[0].boxes.cls])
     obj_ids = np.array(results[0].boxes.id)
 
@@ -48,10 +40,10 @@ async def detect_cars_return_img(file: bytes = File(...)):
     IMAGE_H, IMAGE_W = input_image_np.shape[:2]
     
     points = np.array([
-        [0, IMAGE_H],                # Top Left 
-        [IMAGE_W, IMAGE_H],                # Top Right
-        [IMAGE_W, 0],            # Bottom Right
-        [0, 0],            # Bottom Left
+        [1000, IMAGE_H],              # Bottom Left
+        [1200, 400],                # Top Left 
+        [1850, 400],                # Top Right
+        [2250, IMAGE_H]             # Bottom Right
     ])
 
     transformer_cam = BirdViewTransformer(
@@ -60,7 +52,7 @@ async def detect_cars_return_img(file: bytes = File(...)):
     ) 
 
     image_normalized = transformer_cam.bird_view_transformation(
-        bounding_boxex,
+        bounding_boxes,
         labels,
         obj_ids
     )
@@ -77,13 +69,3 @@ async def detect_cars_return_img(file: bytes = File(...)):
     # print(content == file)
     return Response(content=responce, media_type="image/jpg")#, 
     #return Response(content=bird_view_bytes, media_type="image/jpg")
-
-
-    # for r in results:
-    #     boxes = r.boxes.xyxy  # Boxes object for bbox outputs
-    #     conf = r.boxes.conf  # Masks object for segmenation masks outputs
-    #     cls = r.boxes.cls  # Class probabilities for classification outputs
-    # results_json = json.loads(str(results[0].names))
-    # for obj in results_json:
-
-    # Encoding already annotated image(BoundingBoxes, colors, classes, confidences)

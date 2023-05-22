@@ -347,7 +347,15 @@ class BirdViewTransformer:
         Returns:
             np.array: image with normalized bounding boxes
         """    
-        
+        # Read background image
+        background = cv2.imread('background.jpg')
+
+        # Retrieve desired image dimensions
+        target_height, target_width = image_blank.shape[:2]
+
+        # Resize background image
+        resized_background = cv2.resize(background, (target_width, target_height))
+
         # Retrieve dimensions of a bounding boxe depending on object class
         height_box, width_box = self.box_shapes[object_class]
         
@@ -357,9 +365,9 @@ class BirdViewTransformer:
         box = np.int0(box)
 
         # Draw the filled rectangle using cv2.fillPoly()
-        cv2.fillPoly(image_blank, [box], self.box_color[object_class])
+        cv2.fillPoly(resized_background, [box], self.box_color[object_class])
         
-        return image_blank
+        return resized_background
     
 
     def zip_vectors(self, vectors, object_ids):
@@ -556,6 +564,12 @@ class BirdViewTransformer:
         if sum(mask) == 0:
             return image_normalized
         
+        #----------------------------------------------------------------
+        print('✅ Mask')
+        print(mask)
+        print('---------------')
+        #----------------------------------------------------------------
+        
         # Filter attributes using mask of elements located in required image region
         bounding_boxes_filtered = bounding_boxes[mask]
         labels_filtered = labels[mask]
@@ -567,6 +581,12 @@ class BirdViewTransformer:
             for box_coords 
             in bounding_boxes_filtered
         ]
+
+        #----------------------------------------------------------------
+        print('✅ bounding_boxes_centres')
+        print(bounding_boxes_centres)
+        print('---------------')
+        #----------------------------------------------------------------
 
         # Transform centres using precomputed matrix
         bounding_boxes_centres_transformed = cv2.perspectiveTransform(
@@ -615,6 +635,12 @@ class BirdViewTransformer:
             in zip(self.common_objects.values(), labels_curr)
             if self.normalize_centre(centre_prev, centre_curr, label) is not None
         )]
+
+        #----------------------------------------------------------------
+        print('✅ Normalized')
+        print(normalized_current)
+        print('---------------')
+        #----------------------------------------------------------------
 
         # Update common_objects with normalized centres
         for value, normalized_value in zip(self.common_objects.values(), normalized_current):
