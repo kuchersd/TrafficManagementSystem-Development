@@ -8,7 +8,7 @@ import numpy as np
 
 from BirdViewTransformer import BirdViewTransformer
 
-model = YOLO("yolov8n.pt")
+model = YOLO("yolov8m.pt")
 
 app = FastAPI(
     title="Custom YOLOV8 Machine Learning API",
@@ -49,13 +49,16 @@ async def detect_cars_return_img(file: bytes = File(...)):
     transformer_cam = BirdViewTransformer(
         input_image_np,
         points
-    ) 
+    )
 
     image_normalized = transformer_cam.bird_view_transformation(
         bounding_boxes,
         labels,
         obj_ids
     )
+
+    print(f'⛳️ Original img shapes: {input_image_np.shape}')
+    print(f'⛳️ Transformed img shapes: {image_normalized.shape}')
     print(transformer_cam.bb_centres_transformed_prev)
 
 

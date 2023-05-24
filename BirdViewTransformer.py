@@ -24,9 +24,9 @@ class BirdViewTransformer:
 
         # Define bounding box shapes for each class(longer side is vertical)
         self.box_shapes = {
-            'car': [60, 80],  
-            'truck': [65, 165],
-            'bus': [65, 165]
+            'car': [145, 200],  
+            'truck': [150, 275],
+            'bus': [150, 275]
         }
         # Define bounding box colors for each class
         self.box_color = {
@@ -348,13 +348,16 @@ class BirdViewTransformer:
             np.array: image with normalized bounding boxes
         """    
         # Read background image
-        background = cv2.imread('background.jpg')
+        try:
+            self.background
+        except:
+            self.background = cv2.imread('background.jpg')
 
         # Retrieve desired image dimensions
         target_height, target_width = image_blank.shape[:2]
 
         # Resize background image
-        resized_background = cv2.resize(background, (target_width, target_height))
+        self.background = cv2.resize(self.background, (target_width, target_height))
 
         # Retrieve dimensions of a bounding boxe depending on object class
         height_box, width_box = self.box_shapes[object_class]
@@ -365,9 +368,12 @@ class BirdViewTransformer:
         box = np.int0(box)
 
         # Draw the filled rectangle using cv2.fillPoly()
-        cv2.fillPoly(resized_background, [box], self.box_color[object_class])
+        cv2.fillPoly(self.background, [box], self.box_color[object_class])
         
-        return resized_background
+        print('🧬 Normalized Box plotted successfully')
+        print(box)
+
+        return self.background
     
 
     def zip_vectors(self, vectors, object_ids):
@@ -672,6 +678,7 @@ class BirdViewTransformer:
 
         # Build an image with normalized bounding boxes
         for centre, angle, label in zip(self.centres_curr, self.angles_normalized, labels_curr):
+            print('🛠️ Plotting Bounding Box')
             image_normalized = self.plot_normalized_bounding_box(
                 image_normalized,
                 centre,
