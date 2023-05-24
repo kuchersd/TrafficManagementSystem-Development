@@ -347,10 +347,6 @@ class BirdViewTransformer:
         Returns:
             np.array: image with normalized bounding boxes
         """    
-        # Read background image or pass if exists
-        if not hasattr(self, 'background'):
-            self.background = cv2.imread('background.jpg')
-
         # Retrieve desired image dimensions
         target_height, target_width = image_blank.shape[:2]
 
@@ -551,10 +547,13 @@ class BirdViewTransformer:
         # Create a blank image to draw the rectangle on
         image_normalized = np.zeros_like(image_warped)
 
+        # Read background image
+        self.background = cv2.imread('background.jpg')
+
         # If there are no cars on a frame and it's an initial frame
         if len(bounding_boxes) == 0:
             self.counter = 0
-            return image_normalized
+            return self.background
         
         # If there are no cars on a frame and it's not initial frame
         if (len(bounding_boxes) == 0) and self.bb_centres_transformed_prev is not None:
@@ -565,7 +564,7 @@ class BirdViewTransformer:
             self.counter = 0
             # ---------------------------------
 
-            return image_normalized
+            return self.background
         
         # Build a mask of elements located in required image region
         mask = [self.filter_point(box[2:]) for box in bounding_boxes]
@@ -577,7 +576,7 @@ class BirdViewTransformer:
             self.counter = 0
             # ---------------------------------
 
-            return image_normalized
+            return self.background
         
         #----------------------------------------------------------------
         print('✅ Mask')
@@ -698,8 +697,8 @@ class BirdViewTransformer:
         # Define top and bottom borders for a count region
         if not hasattr(self, 'analyze_region'):
             self.analyze_region = [
-                image_normalized.shape[0] * 0.20,
-                image_normalized.shape[0] * 0.25,
+                image_normalized.shape[0] * 0.2,
+                image_normalized.shape[0] * 0.5,
                 ]
         
         # Update present ids and count amount of unique ids
