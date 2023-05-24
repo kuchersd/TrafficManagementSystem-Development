@@ -1,15 +1,20 @@
 import io
 from PIL import Image
 from fastapi import File, FastAPI, Response
+from fastapi.responses import JSONResponse, ORJSONResponse
+from fastapi.encoders import jsonable_encoder
 from ultralytics import YOLO
 import cv2
 import pandas as pd
 import numpy as np
-
+import os
+import pickle
+import base64
 from BirdViewTransformer import BirdViewTransformer
 
 model = YOLO("yolov8m.pt")
 
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 app = FastAPI(
     title="Custom YOLOV8 Machine Learning API",
     description="""Obtain object value out of image
@@ -40,10 +45,10 @@ async def detect_cars_return_img(file: bytes = File(...)):
     IMAGE_H, IMAGE_W = input_image_np.shape[:2]
     
     points = np.array([
-        [1000, IMAGE_H],              # Bottom Left
-        [1200, 400],                # Top Left 
-        [1850, 400],                # Top Right
-        [2250, IMAGE_H]             # Bottom Right
+        [0, IMAGE_H],                # Top Left 
+        [IMAGE_W, IMAGE_H],                # Top Right
+        [IMAGE_W, 0],            # Bottom Right
+        [0, 0],            # Bottom Left
     ])
 
     transformer_cam = BirdViewTransformer(
@@ -68,7 +73,10 @@ async def detect_cars_return_img(file: bytes = File(...)):
     print(transformer_cam.counter)
 
     #responce = str(content) + str('') + str(bird_view_bytes)+ str('}')  + str(transformer_cam.counter)
-    responce = bird_view_bytes
-    # print(content == file)
-    return Response(content=responce, media_type="image/jpg")#, 
+    s ={'tracked_image':content, 'bird_view':bird_view_bytes, "cars_count": transformer_cam.counter} #
+    json_compatible_item_data = jsonable_encoder(s, custom_encoder={
+    bytes: lambda v: base64.b64encode(v).decode('ascii')})
+
+    print("-------------------------- CARS COUNT:", transformer_cam.counter)
+    return JSONResponse(content=json_compatible_item_data)
     #return Response(content=bird_view_bytes, media_type="image/jpg")

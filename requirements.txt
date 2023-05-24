@@ -4,3 +4,4 @@ fastapi
 ultralytics
 uvicorn[standard]
 python-multipart
+shapely
