@@ -347,10 +347,8 @@ class BirdViewTransformer:
         Returns:
             np.array: image with normalized bounding boxes
         """    
-        # Read background image
-        try:
-            self.background
-        except:
+        # Read background image or pass if exists
+        if not hasattr(self, 'background'):
             self.background = cv2.imread('background.jpg')
 
         # Retrieve desired image dimensions
@@ -555,12 +553,18 @@ class BirdViewTransformer:
 
         # If there are no cars on a frame and it's an initial frame
         if len(bounding_boxes) == 0:
+            self.counter = 0
             return image_normalized
         
         # If there are no cars on a frame and it's not initial frame
         if (len(bounding_boxes) == 0) and self.bb_centres_transformed_prev is not None:
             self.bb_centres_transformed_curr = self.bb_centres_transformed_prev
             self.object_ids_curr = self.object_ids_prev
+
+            ####### TO REMOVE AFTER FASTAPI FIX
+            self.counter = 0
+            # ---------------------------------
+
             return image_normalized
         
         # Build a mask of elements located in required image region
@@ -568,6 +572,11 @@ class BirdViewTransformer:
 
         # If cars are present on a frame but they are not located in specified region
         if sum(mask) == 0:
+
+            ####### TO REMOVE AFTER FASTAPI FIX
+            self.counter = 0
+            # ---------------------------------
+
             return image_normalized
         
         #----------------------------------------------------------------
