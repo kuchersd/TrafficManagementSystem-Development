@@ -59,7 +59,7 @@ async def detect_cars_return_img(file: bytes = File(...)):
 
     print(f'⛳️ Original img shapes: {input_image_np.shape}')
     print(f'⛳️ Transformed img shapes: {image_normalized.shape}')
-    print(transformer_cam.bb_centres_transformed_prev)
+    print(transformer_cam.bb_centres_transformed_curr)
 
 
     success, bird_view_encoded = cv2.imencode('.jpg', image_normalized)
