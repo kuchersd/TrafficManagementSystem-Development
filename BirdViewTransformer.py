@@ -367,6 +367,12 @@ class BirdViewTransformer:
         print('🧬 Normalized Box plotted successfully')
         print(box)
 
+        # Retrieve original image shapes
+        orig_height, orig_width = self.image.shape[:2]
+
+        # Reshape to original size
+        self.background = cv2.resize(self.background, (orig_width, orig_height))
+
         return self.background
     
 
